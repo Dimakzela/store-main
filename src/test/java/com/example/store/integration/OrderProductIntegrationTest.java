@@ -58,9 +58,12 @@ class OrderProductIntegrationTest extends BaseIntegrationTest {
 
         List<Product> savedProducts = productRepository.saveAll(List.of(product1, product2));
 
+        List<Long> savedProductIds = savedProducts.stream().map(Product::getId).toList();
+
         // 3. Arrange: Build input request structures for a fresh checkout transaction
         CreateOrderDTO createOrderDTO = new CreateOrderDTO();
         createOrderDTO.setCustomerId(savedCustomer.getId());
+        createOrderDTO.setProductIds(savedProductIds);
         createOrderDTO.setDescription("Premium Home Office Setup");
 
         // 4. Act: Persist the base order record
