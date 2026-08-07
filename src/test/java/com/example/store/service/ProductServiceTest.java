@@ -140,7 +140,8 @@ class ProductServiceTest {
         Long productId = 99L;
         when(productRepository.findWithOrdersById(productId)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
+        NotFoundException exception =
+                assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
 
         assertTrue(exception.getMessage().contains("Product"));
         assertTrue(exception.getMessage().contains(productId.toString()));
