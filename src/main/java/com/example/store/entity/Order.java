@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(exclude = {"customer", "products"})
+@Table(name = "\"order\"")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +25,7 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+    // CORRECT MANY-TO-MANY BINDING STRUCTURE
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "order_product",
