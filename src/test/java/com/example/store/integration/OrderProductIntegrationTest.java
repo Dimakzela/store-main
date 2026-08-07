@@ -11,7 +11,6 @@ import com.example.store.repository.ProductRepository;
 import com.example.store.service.OrderService;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -49,8 +48,6 @@ class OrderProductIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName(
-            "Should execute Many-to-Many lifecycle: persist an Order with shared Products and verify batch mapping entries")
     void orderAndProduct_ManyToManyLifecycleTest() {
         // 2. Arrange: Populate standalone inventory catalog records inside your database cluster
         Product product1 = new Product();
