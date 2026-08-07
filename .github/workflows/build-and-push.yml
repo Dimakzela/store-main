@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew clean test
 
       - name: Execute Integration Testcontainers
-        run: ./gradlew clean integrationTest
+        run: ./gradlew integrationTest -i
 
       - name: Build Production JAR Artifact
         run: ./gradlew bootJar

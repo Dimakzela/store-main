@@ -37,8 +37,8 @@ class OrderProductIntegrationTest extends BaseIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clear children and join mapping nodes first to prevent FK constraint drops
-        productRepository.deleteAll();
         orderRepository.deleteAll();
+        productRepository.deleteAll();
         customerRepository.deleteAll();
 
         // 1. Establish an active customer parent row in our live PostgreSQL container

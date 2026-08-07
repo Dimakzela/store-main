@@ -46,7 +46,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
 
     //Loads .env into Spring's Environment so local runs (mvn spring-boot:run,IDE run configs)
-    developmentOnly 'me.paulschwarz:springboot3-dotenv:5.1.0'
+    testImplementation 'me.paulschwarz:springboot3-dotenv:5.1.0'
 
     // Test dependencies
     testCompileOnly 'org.projectlombok:lombok'
@@ -110,8 +110,8 @@ tasks.jacocoTestReport {
 tasks.register('integrationTest', Test) {
     description = 'Runs the heavy Testcontainers PostgreSQL integration tests.'
     group = 'verification'
-
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
     include 'com/example/store/integration/**'
-
     useJUnitPlatform()
 }
