@@ -1,0 +1,84 @@
+name: CI/CD Pipeline - Build & Dockerize
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build, Test & Package App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java Development Kit (JDK)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission for Gradle Wrapper
+        run: chmod +x gradlew
+
+      - name: Execute Spotless Linter Checks
+        run: ./gradlew spotlessCheck
+
+      - name: Execute Full Test Suite (Unit + Slice + Integration Testcontainers)
+        run: ./gradlew clean test
+
+      - name: Build Production JAR Artifact
+        run: ./gradlew bootJar
+
+      - name: Upload Compiled JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-backend-jar
+          path: build/libs/*.jar
+          retention-days: 1
+
+  dockerize:
+    name: Build & Push Docker Image
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Download Compiled JAR Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: store-backend-jar
+          path: build/libs
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Image Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and Push Production Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ id.meta.outputs.tags }}
+          labels: ${{ id.meta.outputs.labels }}

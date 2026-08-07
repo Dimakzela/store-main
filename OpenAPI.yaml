@@ -1,0 +1,358 @@
+openapi: 3.0.0
+info:
+  title: store
+  version: '1.0'
+  description: A production-ready store backend API optimized for high-latency database infrastructures.
+  contact:
+    name: SecuritEase Dev
+    url: 'https://www.securitease.com'
+    email: internal@securitease.com
+  termsOfService: 'https://www.securitease.com'
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.htm'
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  /orders:
+    get:
+      summary: Get Orders
+      tags:
+        - store
+      operationId: getOrders
+      description: Get all orders alongside their mapped customer contexts and nested product arrays.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+    post:
+      summary: Create Order
+      tags:
+        - store
+      operationId: createOrder
+      description: Create a new order with linked product items (Enforces '1 or more products' verification rule).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderDTO'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Bad Request - Input validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /orders/{id}:
+    get:
+      summary: Get Order by ID
+      tags:
+        - store
+      operationId: getOrderById
+      description: Retrieves a single order using a singular Entity Graph optimization to maintain a 1 network round-trip boundary.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier key of the order
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Not Found - Target identifier missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /customers:
+    get:
+      summary: Get Customers
+      tags:
+        - store
+      operationId: getCustomers
+      description: Get customers collection with support for an optional case-insensitive substring word filter.
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Target substring parameter to match a portion of one of the words inside the customer's name field
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerResponse'
+    post:
+      summary: Create Customer
+      tags:
+        - store
+      operationId: createCustomer
+      description: Create a new customer profile. Primary keys stay decoupled from payload parameters.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerDTO'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /products:
+    get:
+      summary: Get Products
+      tags:
+        - store
+      operationId: getProducts
+      description: Returns your complete product catalog entries, including a collection of all containing parent order identifiers.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResponse'
+    post:
+      summary: Create Product
+      tags:
+        - store
+      operationId: createProduct
+      description: Create a new product entry inside your catalog workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductDTO'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+  /products/{id}:
+    get:
+      summary: Get Product by ID
+      tags:
+        - store
+      operationId: getProductById
+      description: Retrieve a specific product entry alongside all orderIds referencing it inside the Many-to-Many junction mapping table views.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier key of the product catalog row
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+
+components:
+  schemas:
+    # --- Outbound Presentation Schemas (Response DTOs) ---
+    OrderResponse:
+      title: OrderResponse
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+        description:
+          type: string
+        customer:
+          $ref: '#/components/schemas/OrderCustomerDTO'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderProductDTO'
+
+    OrderCustomerDTO:
+      title: OrderCustomerDTO
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    OrderProductDTO:
+      title: OrderProductDTO
+      type: object
+      required:
+        - id
+        - description
+      properties:
+        id:
+          type: integer
+          format: int64
+        description:
+          type: string
+
+    CustomerResponse:
+      title: CustomerResponse
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    ProductResponse:
+      title: ProductResponse
+      type: object
+      required:
+        - id
+        - description
+        - orderIds
+      properties:
+        id:
+          type: integer
+          format: int64
+        description:
+          type: string
+        orderIds:
+          type: array
+          description: Array mapping out all matching parent order IDs associated via Many-to-Many logic
+          items:
+            type: integer
+            format: int64
+
+    # --- Inbound Creation Schemas (Request Input DTOs) ---
+    CreateOrderDTO:
+      title: CreateOrderDTO
+      type: object
+      required:
+        - customerId
+        - productIds
+      properties:
+        customerId:
+          type: integer
+          format: int64
+        description:
+          type: string
+        productIds:
+          type: array
+          description: Mandatory list containing 1 or more product IDs to attach to this purchase transaction loop
+          minItems: 1
+          items:
+            type: integer
+            format: int64
+
+    CreateCustomerDTO:
+      title: CreateCustomerDTO
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+    CreateProductDTO:
+      title: CreateProductDTO
+      type: object
+      required:
+        - description
+      properties:
+        description:
+          type: string
+
+    # --- Errors Schema Interception Models ---
+    ApiErrorResponse:
+      title: ApiErrorResponse
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        validationErrors:
+          type: object
+          description: Map storing targeted constraint failure keys alongside custom runtime messaging responses
+          additionalProperties:
+            type: string
+
+tags:
+  - name: store
+    description: Core e-commerce data footprint domain operations.
