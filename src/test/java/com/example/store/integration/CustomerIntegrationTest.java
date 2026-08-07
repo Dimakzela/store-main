@@ -82,8 +82,9 @@ class CustomerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void searchCustomers_MatchesSubstringInTheMiddleOfAWord() {
-        // "than" appears inside "Johnathan" but at the start of no word in that name.
-        assertEquals(List.of("Johnathan Miller"), searchNames("than"));
+        // "nath" sits inside "Johnathan" and starts no word in any seeded name, so a
+        // match here can only come from true substring matching.
+        assertEquals(List.of("Johnathan Miller"), searchNames("nath"));
     }
 
     @Test
