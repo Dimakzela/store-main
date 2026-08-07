@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 2-sequence-reset
+      id: 4-sequence-reset
       author: Dimakatso
       changes:
         - sqlFile:

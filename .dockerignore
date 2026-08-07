@@ -1,0 +1,26 @@
+# Keep the build context small and keep local state out of the image.
+# The build stage compiles from source, so no local build output is needed.
+
+.git
+.github
+.gradle
+build
+bin
+out
+
+# Never ship local credentials into a build context.
+.env
+.env.*
+
+.idea
+*.iml
+.vscode
+.DS_Store
+
+utils/node_modules
+
+*.md
+LICENSE
+OpenAPI.yaml
+docker-compose.yml
+Dockerfile

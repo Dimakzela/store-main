@@ -126,7 +126,7 @@ class OrderControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("Input validation failed"))
-                .andExpect(jsonPath("$.validationErrors.customerId").value("Customer ID is required"));
+                .andExpect(jsonPath("$.validationErrors.customerId").value("Order's customer ID is required"));
     }
 
     @Test
@@ -155,6 +155,32 @@ class OrderControllerTests {
                 .andExpect(jsonPath("$.products").isArray())
                 .andExpect(jsonPath("$.products[0].id").value(99))
                 .andExpect(jsonPath("$.products[0].description").value("Logitech Mouse"));
+    }
+
+    @Test
+    void createOrder_WhenCustomerIdDoesNotExist_Returns404FromGlobalHandler() throws Exception {
+        when(orderService.createOrder(any(CreateOrderDTO.class))).thenThrow(new NotFoundException("Customer", 1L));
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createOrderDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Customer with ID 1 not found"));
+    }
+
+    @Test
+    void createOrder_WhenProductIdsAreNotInCatalog_Returns400FromGlobalHandler() throws Exception {
+        when(orderService.createOrder(any(CreateOrderDTO.class)))
+                .thenThrow(new IllegalArgumentException("One or more product IDs provided are invalid"));
+
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createOrderDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("One or more product IDs provided are invalid"));
     }
 
     @Test

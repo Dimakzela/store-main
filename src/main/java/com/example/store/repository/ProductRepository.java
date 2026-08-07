@@ -12,9 +12,9 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @EntityGraph(attributePaths = "order")
+    @EntityGraph(attributePaths = "orders")
     List<Product> findAll();
 
-    @EntityGraph(attributePaths = {"order"})
-    Optional<Product> findWithOrderById(Long id);
+    @EntityGraph(attributePaths = {"orders"})
+    Optional<Product> findWithOrdersById(Long id);
 }

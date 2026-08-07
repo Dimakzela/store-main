@@ -20,6 +20,13 @@ repositories {
     mavenCentral()
 }
 
+// Spring Boot's `jar` task emits an extra non-executable "-plain" JAR that nothing
+// downstream consumes. Disabling it keeps build/libs to a single artifact, so
+// `build/libs/*.jar` is unambiguous in the Dockerfile and in CI artifact uploads.
+tasks.named('jar') {
+    enabled = false
+}
+
 spotless {
     java {
         palantirJavaFormat('2.50.0')
@@ -46,7 +53,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
 
     //Loads .env into Spring's Environment so local runs (mvn spring-boot:run,IDE run configs)
-    testImplementation 'me.paulschwarz:springboot3-dotenv:5.1.0'
+    developmentOnly 'me.paulschwarz:springboot3-dotenv:5.1.0'
 
     // Test dependencies
     testCompileOnly 'org.projectlombok:lombok'

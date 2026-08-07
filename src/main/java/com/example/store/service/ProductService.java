@@ -35,7 +35,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductDTO getProductById(Long id) {
         return productRepository
-                .findWithOrderById(id)
+                .findWithOrdersById(id)
                 .map(productMapper::productToProductDTO)
                 .orElseThrow(() -> new NotFoundException("Product", id));
     }

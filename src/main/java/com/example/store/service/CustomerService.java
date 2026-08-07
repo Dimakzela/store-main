@@ -28,6 +28,7 @@ public class CustomerService {
         return customerMapper.customersToCustomerDTOs(customerRepository.searchByNameSubstring(query.strip()));
     }
 
+    @Transactional
     public CustomerDTO createCustomer(CreateCustomerDTO customer) {
         return customerMapper.customerToCustomerDTO(
                 customerRepository.save(customerMapper.createDTOToCustomer(customer)));

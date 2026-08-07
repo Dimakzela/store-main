@@ -1,7 +1,7 @@
 # Local development / manual verification of the image the CI pipeline builds.
 #
 #   docker compose up --build
-#   curl http://localhost:8080/actuator/health
+#   curl http://localhost:8080/products
 #
 # To run against an image already published by CI instead of building locally:
 #   IMAGE=ghcr.io/<owner>/<repo>:latest docker compose up
@@ -24,6 +24,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  app:
+    # Builds the multi-stage Dockerfile locally. Override IMAGE to pull a
+    # CI-published tag instead of building.
+    image: ${IMAGE:-store:local}
+    build:
+      context: .
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/store
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "8080:8080"
 
 volumes:
   postgres:

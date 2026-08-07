@@ -87,9 +87,7 @@ class ProductServiceTest {
 
         when(productRepository.save(unmappedProduct)).thenThrow(new RuntimeException("Database connection timeout"));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            productService.createProduct(inputDto);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.createProduct(inputDto));
 
         assertEquals("Database connection timeout", exception.getMessage());
 
@@ -125,7 +123,7 @@ class ProductServiceTest {
         Product mockProduct = new Product();
         ProductDTO expectedDto = new ProductDTO();
 
-        when(productRepository.findWithOrderById(productId)).thenReturn(Optional.of(mockProduct));
+        when(productRepository.findWithOrdersById(productId)).thenReturn(Optional.of(mockProduct));
         when(productMapper.productToProductDTO(mockProduct)).thenReturn(expectedDto);
 
         ProductDTO result = productService.getProductById(productId);
@@ -133,18 +131,16 @@ class ProductServiceTest {
         assertNotNull(result);
         assertEquals(expectedDto, result);
 
-        verify(productRepository, times(1)).findWithOrderById(productId);
+        verify(productRepository, times(1)).findWithOrdersById(productId);
         verify(productMapper, times(1)).productToProductDTO(mockProduct);
     }
 
     @Test
     void getProductById_WhenProductDoesNotExist_ThrowsNotFoundException() {
         Long productId = 99L;
-        when(productRepository.findWithOrderById(productId)).thenReturn(Optional.empty());
+        when(productRepository.findWithOrdersById(productId)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            productService.getProductById(productId);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
 
         assertTrue(exception.getMessage().contains("Product"));
         assertTrue(exception.getMessage().contains(productId.toString()));
