@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
-      id: 3-product-schema
+      id: 2-sequence-reset
       author: Dimakatso
       changes:
         - sqlFile:
-            path: db/changelog/product-schema.sql
+            path: db/changelog/sequence-reset.sql
