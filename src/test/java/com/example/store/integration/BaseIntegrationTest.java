@@ -3,8 +3,11 @@ package com.example.store.integration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.Duration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers // Activates the container lifecycle hooks
@@ -16,5 +19,6 @@ public abstract class BaseIntegrationTest {
     protected static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("store_test_db")
             .withUsername("test_admin")
-            .withPassword("test_secure_pass");
+            .withPassword("test_secure_pass")
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)));
 }
